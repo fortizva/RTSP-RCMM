@@ -38,6 +38,11 @@ public class Server extends JFrame implements ActionListener {
   Timer timer; //timer used to send the images at the video frame rate
   byte[] buf; //buffer used to store the images to send to the client 
 
+  //Audio variables
+  AudioStream audio;
+  static boolean audio_mode = false;
+  static int RAW_TYPE = 0;
+  
   //RTSP variables
   //----------------
   //rtsp states
@@ -139,7 +144,11 @@ public class Server extends JFrame implements ActionListener {
 	    theServer.send_RTSP_response();
    
 	    //init the VideoStream object:
-	    theServer.video = new VideoStream(VideoFileName);
+	    audio_mode = VideoFileName.endsWith(".raw");
+	    if(audio_mode)
+	    	theServer.audio = new AudioStream(VideoFileName);
+	    else
+	    	theServer.video = new VideoStream(VideoFileName);
 
 	    //init RTP socket
 	    theServer.RTPsocket = new DatagramSocket();
@@ -201,10 +210,18 @@ public class Server extends JFrame implements ActionListener {
        
 	try {
 	  //get next frame to send from the video, as well as its size
-	  int image_length = video.getnextframe(buf);
-
+	  int image_length;
+	  if(audio_mode)
+		  image_length = audio.getnextchunk(buf);
+	  else
+		  image_length = video.getnextframe(buf);
+	  
 	  //Builds an RTPpacket object containing the frame
-	  RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
+	  RTPpacket rtp_packet;
+	  if(audio_mode) 
+		  rtp_packet = new RTPpacket(RAW_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
+	  else
+		  rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
 	  
 	  //get to total length of the full rtp packet to send
 	  int packet_length = rtp_packet.getlength();
@@ -226,6 +243,7 @@ public class Server extends JFrame implements ActionListener {
 	}
 	catch(Exception ex)
 	  {
+		System.out.println("DEBUG: actionPerformed()");
 	    System.out.println("Exception caught: "+ex);
 	    System.exit(0);
 	  }
@@ -251,8 +269,6 @@ public class Server extends JFrame implements ActionListener {
 
       StringTokenizer tokens = new StringTokenizer(RequestLine);
       String request_type_string = tokens.nextToken();
-
-      System.out.println("DEBUG: TOKENIZED");
       
       //convert to request_type structure:
       if ((new String(request_type_string)).compareTo("SETUP") == 0)
@@ -264,7 +280,6 @@ public class Server extends JFrame implements ActionListener {
       else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
 	request_type = TEARDOWN;
 
-      System.out.println("DEBUG: request_type=" + request_type);
       if (request_type == SETUP)
 	{
 	  //extract VideoFileName from RequestLine
@@ -294,6 +309,7 @@ public class Server extends JFrame implements ActionListener {
     }
     catch(Exception ex)
       {
+	System.out.println("DEBUG: parse_RTSP_request()");
 	System.out.println("Exception caught: "+ex);
 	System.exit(0);
       }
@@ -314,6 +330,7 @@ public class Server extends JFrame implements ActionListener {
     }
     catch(Exception ex)
       {
+	System.out.println("DEBUG: send_RTSP_response()");
 	System.out.println("Exception caught: "+ex);
 	System.exit(0);
       }

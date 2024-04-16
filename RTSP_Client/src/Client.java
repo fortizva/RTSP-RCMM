@@ -56,10 +56,15 @@ public class Client{
 
   SourceDataLine speaker; //Audio datasource to speaker
 
+  //Player mode
+  static boolean audio_mode = false;
 
   //Video constants:
   //------------------
   static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
+  
+  //Audio constants:
+  static int RAW_TYPE = 0;
  
   //--------------------------
   //Constructor
@@ -145,6 +150,13 @@ public class Client{
 
     //get video filename to request:
     VideoFileName = argv[2];
+    
+    // Initalize audio if extension is RAW
+    if(VideoFileName.endsWith(".raw")) {
+    	audio_mode = true;
+    	System.out.println("Audio file detected, initializing audio line...");
+    	theClient.audio_initialization();
+    }
 
     //Establish a TCP connection with the server to exchange RTSP messages
     //------------------
@@ -325,30 +337,35 @@ public class Client{
       rcvdp = new DatagramPacket(buf, buf.length);
 
       try{
-	//receive the DP from the socket:
-	RTPsocket.receive(rcvdp);
-	  
-	//create an RTPpacket object from the DP
-	RTPpacket rtp_packet = new RTPpacket(rcvdp.getData(), rcvdp.getLength());
-
-	//print important header fields of the RTP packet received: 
-	System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
+		//receive the DP from the socket:
+		RTPsocket.receive(rcvdp);
+		  
+		//create an RTPpacket object from the DP
+		RTPpacket rtp_packet = new RTPpacket(rcvdp.getData(), rcvdp.getLength());
 	
-	//print header bitstream:
-	rtp_packet.printheader();
-
-	//get the payload bitstream from the RTPpacket object
-	int payload_length = rtp_packet.getpayload_length();
-	byte [] payload = new byte[payload_length];
-	rtp_packet.getpayload(payload);
-
-	//get an Image object from the payload bitstream
-	Toolkit toolkit = Toolkit.getDefaultToolkit();
-	Image image = toolkit.createImage(payload, 0, payload_length);
+		//print important header fields of the RTP packet received: 
+		System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
+		
+		//print header bitstream:
+		rtp_packet.printheader();
 	
-	//display the image as an ImageIcon object
-	icon = new ImageIcon(image);
-	iconLabel.setIcon(icon);
+		//get the payload bitstream from the RTPpacket object
+		int payload_length = rtp_packet.getpayload_length();
+		byte [] payload = new byte[payload_length];
+		rtp_packet.getpayload(payload);
+		
+		if(audio_mode) {
+			//Write bytes to audio line
+			speaker.write(payload, 0, payload_length);
+		} else {
+			//get an Image object from the payload bitstream
+			Toolkit toolkit = Toolkit.getDefaultToolkit();
+			Image image = toolkit.createImage(payload, 0, payload_length);
+			
+			//display the image as an ImageIcon object
+			icon = new ImageIcon(image);
+			iconLabel.setIcon(icon);
+		}
       }
       catch (InterruptedIOException iioe){
 	//System.out.println("Nothing to read");

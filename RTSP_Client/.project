@@ -16,16 +16,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>res/Summercat.raw</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/multimedia/Summercat.raw</locationURI>
-		</link>
-		<link>
-			<name>res/movie.mjpeg</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/multimedia/movie.mjpeg</locationURI>
-		</link>
-		<link>
 			<name>src/RTPpacket.java</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/RTSP_Server/src/RTPpacket.java</locationURI>
