@@ -40,6 +40,8 @@ public class Client {
 	// Retardo y jitter
 	static long packet_delay = 0l;
 	static long last_packet_time = 0l;
+	static long last_packet_delay = 0l;
+	static long jitter = 0l;
 	
 
 	// DEBUG
@@ -175,6 +177,7 @@ public class Client {
 		s += "<br>Lost packets: "+lost_packets+"</br>";
 		s += "<br>Packet loss: "+ packet_loss +"%</br>";
 		s += "<br>Packet delay (milis): "+packet_delay+"</br>";
+		s += "<br>Jitter (milis): "+((jitter >= 0) ? "+":"")+jitter+"</br>";
 		s += "</html>";
 		return s;
 	}
@@ -403,8 +406,12 @@ public class Client {
 				statsLabel.setText(getStats());
 				
 				// Packet delay
+				last_packet_delay = packet_delay; // Save last packet delay to calculate jitter
 				packet_delay = (last_packet_time==0)? 0 : System.currentTimeMillis() - last_packet_time;
 				last_packet_time = System.currentTimeMillis();
+				// -----------------------------
+				// Jitter
+				jitter = last_packet_delay - packet_delay;
 				// -----------------------------
 				
 				// print important header fields of the RTP packet received:
