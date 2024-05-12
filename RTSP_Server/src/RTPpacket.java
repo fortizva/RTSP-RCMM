@@ -48,7 +48,7 @@ public class RTPpacket {
 		byte[] bin = new byte[(int) Math.ceil(Long.toBinaryString(value).length()/8.0)];
 		for(int i = bin.length-1; i >= 0; i--) {
 			bin[bin.length-1 - i] = (byte) ((value >> (8*i)) & 0xFF);
-			System.out.println(String.format("%8s", Integer.toBinaryString(bin[i] & 0xFF)).replace(' ', '0'));
+			//System.out.println(String.format("%8s", Integer.toBinaryString(bin[i] & 0xFF)).replace(' ', '0'));
 		}	
 		
 		return bin;
