@@ -43,7 +43,7 @@ public class Client {
 	static long last_packet_time = 0l;
 	static long last_packet_delay = 0l;
 	static long jitter = 0l;
-	
+	// ---
 
 	// DEBUG
 	// ----
@@ -405,7 +405,6 @@ public class Client {
 					packet_loss = (lost_packets*100)/(last_packet_nb+1);
 				}else
 					last_packet_nb = rtp_packet.getsequencenumber();
-				statsLabel.setText(getStats());
 				
 				// Packet delay
 				last_packet_delay = packet_delay; // Save last packet delay to calculate jitter
@@ -418,6 +417,7 @@ public class Client {
 				// Bytes received
 				received_bytes += rcvdp.getLength();
 				// -----------------------------
+				statsLabel.setText(getStats());
 				
 				// print important header fields of the RTP packet received:
 				if (verbose)
