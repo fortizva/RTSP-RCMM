@@ -174,16 +174,16 @@ public class Client {
 	// -----------------------------------
 	public String getStats() {
 		String s = new String("<html><br>Stream statistics:</br>");
-		s += "<br>Last packet #: "+last_packet_nb+"</br>";
-		s += "<br>Lost packets: "+lost_packets+"</br>";
-		s += "<br>Packet loss: "+ packet_loss +"%</br>";
-		s += "<br>Packet delay (milis): "+packet_delay+"</br>";
-		s += "<br>Received bytes: "+received_bytes+"</br>";
-		s += "<br>Jitter (milis): "+((jitter >= 0) ? "+":"")+jitter+"</br>";
+		s += "<br>Last packet #: " + last_packet_nb + "</br>";
+		s += "<br>Lost packets: " + lost_packets + "</br>";
+		s += "<br>Packet loss: " + packet_loss + "%</br>";
+		s += "<br>Packet delay (milis): " + packet_delay + "</br>";
+		s += "<br>Received bytes: " + received_bytes + "</br>";
+		s += "<br>Jitter (milis): " + ((jitter >= 0) ? "+" : "") + jitter + "</br>";
 		s += "</html>";
 		return s;
 	}
-	
+
 	// ------------------------------------
 	// main
 	// ------------------------------------
@@ -399,26 +399,26 @@ public class Client {
 				// Update stats
 				// -----------------------------
 				// Packet loss
-				if(rtp_packet.getsequencenumber() != last_packet_nb+1) {
+				if (rtp_packet.getsequencenumber() > last_packet_nb + 1) {
 					lost_packets += (rtp_packet.getsequencenumber() - last_packet_nb);
 					last_packet_nb = rtp_packet.getsequencenumber();
-					packet_loss = (lost_packets*100)/(last_packet_nb+1);
-				}else
+					packet_loss = (lost_packets * 100) / (last_packet_nb + 1);
+				} else
 					last_packet_nb = rtp_packet.getsequencenumber();
-				
+
 				// Packet delay
 				last_packet_delay = packet_delay; // Save last packet delay to calculate jitter
-				packet_delay = (last_packet_time==0)? 0 : System.currentTimeMillis() - last_packet_time;
+				packet_delay = (last_packet_time == 0) ? 0 : System.currentTimeMillis() - last_packet_time;
 				last_packet_time = System.currentTimeMillis();
 
 				// Jitter
 				jitter = last_packet_delay - packet_delay;
-				
+
 				// Bytes received
 				received_bytes += rcvdp.getLength();
 				// -----------------------------
 				statsLabel.setText(getStats());
-				
+
 				// print important header fields of the RTP packet received:
 				if (verbose)
 					System.out.println("Got RTP packet with SeqNum # " + rtp_packet.getsequencenumber() + " TimeStamp "
@@ -507,20 +507,20 @@ public class Client {
 			// RTSPBufferedWriter.write(...);
 			String request_line = VideoFileName + " RTSP/1.0";
 			switch (request_type) {
-			case "SETUP":
-				request_line = "SETUP " + request_line;
-				break;
-			case "PLAY":
-				request_line = "PLAY " + request_line;
-				break;
-			case "PAUSE":
-				request_line = "PAUSE " + request_line;
-				break;
-			case "TEARDOWN":
-				request_line = "TEARDOWN " + request_line;
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + state);
+				case "SETUP":
+					request_line = "SETUP " + request_line;
+					break;
+				case "PLAY":
+					request_line = "PLAY " + request_line;
+					break;
+				case "PAUSE":
+					request_line = "PAUSE " + request_line;
+					break;
+				case "TEARDOWN":
+					request_line = "TEARDOWN " + request_line;
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + state);
 			}
 			RTSPBufferedWriter.write(request_line + CRLF);
 			if (verbose)
