@@ -34,6 +34,7 @@ public class Client {
 
 	// Stats
 	// ---
+	static int received_bytes = 0;
 	static int last_packet_nb = 0;
 	static int lost_packets = 0;
 	static int packet_loss = 0;
@@ -177,6 +178,7 @@ public class Client {
 		s += "<br>Lost packets: "+lost_packets+"</br>";
 		s += "<br>Packet loss: "+ packet_loss +"%</br>";
 		s += "<br>Packet delay (milis): "+packet_delay+"</br>";
+		s += "<br>Received bytes: "+received_bytes+"</br>";
 		s += "<br>Jitter (milis): "+((jitter >= 0) ? "+":"")+jitter+"</br>";
 		s += "</html>";
 		return s;
@@ -409,9 +411,12 @@ public class Client {
 				last_packet_delay = packet_delay; // Save last packet delay to calculate jitter
 				packet_delay = (last_packet_time==0)? 0 : System.currentTimeMillis() - last_packet_time;
 				last_packet_time = System.currentTimeMillis();
-				// -----------------------------
+
 				// Jitter
 				jitter = last_packet_delay - packet_delay;
+				
+				// Bytes received
+				received_bytes += rcvdp.getLength();
 				// -----------------------------
 				
 				// print important header fields of the RTP packet received:
